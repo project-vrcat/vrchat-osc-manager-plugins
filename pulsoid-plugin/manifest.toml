@@ -1,0 +1,11 @@
+description = "Pulsoid Plugin"
+name = "pulsoid-plugin"
+version = "0.0.1"
+
+[install]
+args = ["cache", "main.ts"]
+executable = "deno.exe"
+
+[entrypoint]
+args = ["run", "-A", "main.ts", "--id", "XXX"]
+executable = "deno.exe"
