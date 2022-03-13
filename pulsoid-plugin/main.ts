@@ -1,7 +1,7 @@
 import { parse } from "https://deno.land/std@0.118.0/flags/mod.ts";
-import { green, yellow } from "https://deno.land/std@0.129.0/fmt/colors.ts";
+import { green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
 import {
-  pluginName,
+  plugin,
   register,
   send,
 } from "../module/deno/vrchat-osc-manager-deno.ts";
@@ -10,7 +10,6 @@ const args = parse(Deno.args);
 
 register();
 
-let ws: WebSocket;
 const ramielUrl: string = await getRamielUrl(args.id);
 
 async function getRamielUrl(widgetId: string): Promise<string> {
@@ -27,26 +26,28 @@ async function getRamielUrl(widgetId: string): Promise<string> {
   return info.result.ramielUrl;
 }
 
-function start() {
+let ws = new WebSocket(ramielUrl);
+
+function reconnect(old: WebSocket) {
+  console.log(plugin, green("Pulsoid Reconnect"));
   ws = new WebSocket(ramielUrl);
-  ws.onopen = () => {
-    console.log(yellow(`[${pluginName}]`), green("Pulsoid Connected"));
-  };
-  ws.onmessage = (event) => {
-    const info = JSON.parse(event.data);
-    console.log(
-      yellow(`[${pluginName}]`),
-      new Date(),
-      "Heart Rate:",
-      info.data.heartRate,
-    );
-    send(
-      "/avatar/parameters/OSC_HeartRate",
-      info.data.heartRate / (220 / 2) - 1,
-    );
-  };
-  ws.onclose = () => setTimeout(start, 1000);
-  ws.onerror = () => setTimeout(start, 1000);
+  ws.onopen = old.onopen;
+  ws.onmessage = old.onmessage;
+  ws.onclose = old.onclose;
 }
 
-start();
+ws = new WebSocket(ramielUrl);
+ws.onopen = () => {
+  console.log(plugin, green("Pulsoid Connected"));
+};
+ws.onmessage = (event: MessageEvent) => {
+  const info = JSON.parse(event.data);
+  const hr = info.data.heartRate;
+  console.log(plugin, new Date(), "Heart Rate:", hr);
+  send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
+};
+ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);
+
+setTimeout(() => {
+  ws.close();
+}, 5000);
