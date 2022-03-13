@@ -37,9 +37,7 @@ function reconnect(old: WebSocket) {
 }
 
 ws = new WebSocket(ramielUrl);
-ws.onopen = () => {
-  console.log(plugin, green("Pulsoid Connected"));
-};
+ws.onopen = () => console.log(plugin, green("Pulsoid Connected"));
 ws.onmessage = (event: MessageEvent) => {
   const info = JSON.parse(event.data);
   const hr = info.data.heartRate;
@@ -47,7 +45,3 @@ ws.onmessage = (event: MessageEvent) => {
   send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
 };
 ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);
-
-setTimeout(() => {
-  ws.close();
-}, 5000);
