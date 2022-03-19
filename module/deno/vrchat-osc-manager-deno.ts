@@ -1,30 +1,74 @@
+// deno-lint-ignore-file no-explicit-any
 import { green, yellow } from "https://deno.land/std@0.129.0/fmt/colors.ts";
 
-let ws: WebSocket;
-let address: string;
 export const pluginName = Deno.env.get("VRCOSCM_PLUGIN");
 export const plugin = yellow(`[${pluginName}]`);
 
-function reconnect(old: WebSocket) {
-  console.log(plugin, green("Manager Reconnect"));
-  ws = new WebSocket(address);
-  ws.onopen = old.onopen;
-  ws.onmessage = old.onmessage;
-  ws.onclose = old.onclose;
+interface Pool {
+  resolve: (value: void | PromiseLike<void>) => void;
+  reject: (reason?: any) => void;
+  pp: (data: any) => any;
 }
 
-export function register(
-  hostname = Deno.env.get("VRCOSCM_HOSTNAME") ?? "localhost",
-  port = parseInt(Deno.env.get("VRCOSCM_PORT") ?? "8787"),
-) {
-  address = `ws://${hostname}:${port}`;
-  ws = new WebSocket(address);
-  ws.onopen = () => console.log(plugin, green("Manager Connected"));
-  ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);
-}
+export class Manager {
+  public address: string;
+  private ws: WebSocket | undefined;
+  private pool: Record<string, Pool>; // 不可靠, 但能用 ¯\_(ツ)_/¯
 
-export function send(addr: string, value: string | number | boolean) {
-  if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify({ method: "send", addr, value }));
+  constructor(
+    private addr: string = Deno.env.get("VRCOSCM_WS_ADDR") ?? "localhost:8787",
+  ) {
+    this.address = `ws://${this.addr}`;
+    this.pool = {};
+  }
+
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.ws = new WebSocket(this.address);
+      this.ws.onopen = () => {
+        console.log(plugin, green("Manager Connected"));
+        resolve();
+      };
+      this.ws.onmessage = (event: MessageEvent) => {
+        if (!event.data) return;
+        const m = JSON.parse(event.data);
+        if (m.method in this.pool) {
+          this.pool[m.method].resolve(this.pool[m.method].pp(m));
+          delete this.pool[m.method];
+        }
+      };
+      this.ws.onerror = (err) => reject(err);
+      this.ws.onclose = () => setTimeout((_) => this.reconnect(), 1000);
+    });
+  }
+
+  reconnect() {
+    const old = this.ws!;
+    console.log(plugin, green("Manager Reconnect"));
+    this.ws = new WebSocket(this.address);
+    this.ws.onopen = old.onopen;
+    this.ws.onmessage = old.onmessage;
+    this.ws.onclose = old.onclose;
+  }
+
+  private wsSend(data: any) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify(data));
+    }
+  }
+
+  getOptions(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.pool["get_options"] = {
+        resolve,
+        reject,
+        pp: (data: any) => data.options,
+      };
+      this.wsSend({ method: "get_options", plugin: pluginName });
+    });
+  }
+
+  send(addr: string, value: string | number | boolean) {
+    this.wsSend({ method: "send", plugin: pluginName, addr, value });
   }
 }

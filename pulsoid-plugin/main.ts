@@ -1,16 +1,25 @@
-import { parse } from "https://deno.land/std@0.118.0/flags/mod.ts";
-import { green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
-import {
-  plugin,
-  register,
-  send,
-} from "../module/deno/vrchat-osc-manager-deno.ts";
+import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
+import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
+import { Manager, plugin } from "../module/deno/vrchat-osc-manager-deno.ts";
 
-const args = parse(Deno.args);
+interface Options {
+  id: string;
+}
 
-register();
+const manager = new Manager();
+await manager.connect();
+const options: Options = await manager.getOptions();
 
-const ramielUrl: string = await getRamielUrl(args.id);
+if (!options.id) {
+  console.log(plugin, brightRed("No widget id found"));
+  Deno.exit(5);
+}
+
+const ramielUrl: string = await getRamielUrl(options.id);
+if (!ramielUrl) {
+  console.log(plugin, brightRed("No pulsoid url found"));
+  Deno.exit(5);
+}
 
 async function getRamielUrl(widgetId: string): Promise<string> {
   const info = await fetch("https://pulsoid.net/v1/api/public/rpc", {
@@ -41,7 +50,12 @@ ws.onopen = () => console.log(plugin, green("Pulsoid Connected"));
 ws.onmessage = (event: MessageEvent) => {
   const info = JSON.parse(event.data);
   const hr = info.data.heartRate;
-  console.log(plugin, new Date(), "Heart Rate:", hr);
-  send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
+  console.log(
+    plugin,
+    brightRed(format(new Date(), "MM-dd HH:mm")),
+    "Heart Rate:",
+    hr,
+  );
+  manager.send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
 };
 ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);

@@ -1,18 +1,23 @@
-import { parse } from "https://deno.land/std@0.118.0/flags/mod.ts";
-import { green, yellow } from "https://deno.land/std@0.129.0/fmt/colors.ts";
+import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
+import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts";
 import WS from "https://deno.land/x/custom_socket@1.1.0/mod.ts";
-import {
-  pluginName,
-  register,
-  send,
-} from "../module/deno/vrchat-osc-manager-deno.ts";
+import { Manager, plugin } from "../module/deno/vrchat-osc-manager-deno.ts";
 
-const args = parse(Deno.args);
+interface Options {
+  id: string;
+}
 
-register();
+const manager = new Manager();
+await manager.connect();
+const options: Options = await manager.getOptions();
 
-const resp = await fetch("https://app.hyperate.io/" + args.id, {
+if (!options.id) {
+  console.log(plugin, brightRed("No widget id found"));
+  Deno.exit(5);
+}
+
+const resp = await fetch("https://app.hyperate.io/" + options.id, {
   method: "GET",
   headers: {
     "User-Agent":
@@ -40,7 +45,7 @@ const phx_join = JSON.stringify([
   "lv:" + view?.attributes["id"],
   "phx_join",
   {
-    url: "https://app.hyperate.io/" + args.id,
+    url: "https://app.hyperate.io/" + options.id,
     params: {
       _csrf_token: csrf_token,
       _mounts: 0,
@@ -58,7 +63,7 @@ function start() {
     { Cookie: cookies },
   );
   ws.onopen = () => {
-    console.log(yellow(`[${pluginName}]`), green("Hyperate Connected"));
+    console.log(plugin, green("Hyperate Connected"));
     setTimeout((_) => ws.send(phx_join), 100);
   };
   ws.onmessage = (event) => {
@@ -67,8 +72,13 @@ function start() {
     switch (info[3]) {
       case "diff":
         hr = info[4].e[0][1].heartbeat;
-        console.log(yellow(`[${pluginName}]`), new Date(), "Heart Rate:", hr);
-        send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
+        console.log(
+          plugin,
+          brightRed(format(new Date(), "MM-dd HH:mm")),
+          "Heart Rate:",
+          hr,
+        );
+        manager.send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
         break;
 
       default:
