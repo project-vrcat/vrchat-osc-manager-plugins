@@ -1,11 +1,9 @@
+author = "Gizmo"
 description = "Pulsoid Plugin"
+homepage = "https://github.com/project-vrcat/vrchat-osc-manager-plugins/tree/main/pulsoid-plugin"
 name = "pulsoid-plugin"
 version = "0.0.1"
 
-[install]
-args = ["cache", "main.ts"]
-executable = "deno.exe"
-
 [entrypoint]
-args = ["run", "-A", "main.ts", "--id", "XXX"]
+args = ["run", "-A", "main.ts"]
 executable = "deno.exe"
