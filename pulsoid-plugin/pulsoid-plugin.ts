@@ -1,6 +1,6 @@
 import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
 import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
-import { Manager, plugin } from "../module/deno/vrchat-osc-manager-deno.ts";
+import { Manager, plugin } from "../module/deno/vrchat-osc-manager.ts";
 
 interface Options {
   id: string;

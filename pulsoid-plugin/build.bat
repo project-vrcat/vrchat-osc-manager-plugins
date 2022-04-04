@@ -1,1 +1,1 @@
-deno bundle main.ts | esbuild --minify > pulsoid-plugin.js
+deno bundle pulsoid-plugin.ts | esbuild --minify > pulsoid-plugin.js
