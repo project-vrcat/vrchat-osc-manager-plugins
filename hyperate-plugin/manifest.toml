@@ -2,8 +2,8 @@ author = "Gizmo"
 description = "Hyperate Plugin"
 homepage = "https://github.com/project-vrcat/vrchat-osc-manager-plugins/tree/main/hyperate-plugin"
 name = "hyperate-plugin"
-version = "0.0.1"
+version = "0.0.2"
 
 [entrypoint]
-args = ["run", "-A", "main.ts"]
-executable = "deno.exe"
+args = ["dist/hyperate-plugin.js"]
+executable = "node.exe"
