@@ -3,7 +3,7 @@ import chalk from "chalk";
 import fetch from "node-fetch";
 import { format } from "date-fns";
 import { load as loadDOM } from "cheerio";
-import { Manager, plugin } from "../module/node/vrchat-osc-manager";
+import { Manager } from "../module/node/vrchat-osc-manager";
 
 interface Options {
   id: string;
@@ -15,7 +15,7 @@ async function main() {
   const options: Options = await manager.getOptions();
 
   if (!options.id) {
-    console.log(plugin, chalk.redBright("No widget id found"));
+    console.log(chalk.redBright("No widget id found"));
     process.exit(5);
   }
 
@@ -64,7 +64,7 @@ async function main() {
       { headers: { Cookie: cookies } },
     );
     ws.onopen = () => {
-      console.log(plugin, chalk.green("Hyperate Connected"));
+      console.log(chalk.green("Hyperate Connected"));
       setTimeout((_) => ws.send(phx_join), 100);
     };
     ws.onmessage = (event) => {
@@ -74,7 +74,6 @@ async function main() {
         case "diff":
           hr = info[4].e[0][1].heartbeat;
           console.log(
-            plugin,
             chalk.redBright(format(new Date(), "MM-dd HH:mm")),
             "Heart Rate:",
             hr,

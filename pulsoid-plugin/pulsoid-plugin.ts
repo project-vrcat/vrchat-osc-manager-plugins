@@ -1,6 +1,6 @@
 import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
 import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
-import { Manager, plugin } from "../module/deno/vrchat-osc-manager.ts";
+import { Manager } from "../module/deno/vrchat-osc-manager.ts";
 
 interface Options {
   id: string;
@@ -11,13 +11,13 @@ await manager.connect();
 const options: Options = await manager.getOptions();
 
 if (!options.id) {
-  console.log(plugin, brightRed("No widget id found"));
+  console.log(brightRed("No widget id found"));
   Deno.exit(5);
 }
 
 const ramielUrl: string = await getRamielUrl(options.id);
 if (!ramielUrl) {
-  console.log(plugin, brightRed("No pulsoid url found"));
+  console.log(brightRed("No pulsoid url found"));
   Deno.exit(5);
 }
 
@@ -38,7 +38,7 @@ async function getRamielUrl(widgetId: string): Promise<string> {
 let ws = new WebSocket(ramielUrl);
 
 function reconnect(old: WebSocket) {
-  console.log(plugin, green("Pulsoid Reconnect"));
+  console.log(green("Pulsoid Reconnect"));
   ws = new WebSocket(ramielUrl);
   ws.onopen = old.onopen;
   ws.onmessage = old.onmessage;
@@ -46,16 +46,11 @@ function reconnect(old: WebSocket) {
 }
 
 ws = new WebSocket(ramielUrl);
-ws.onopen = () => console.log(plugin, green("Pulsoid Connected"));
+ws.onopen = () => console.log(green("Pulsoid Connected"));
 ws.onmessage = (event: MessageEvent) => {
   const info = JSON.parse(event.data);
   const hr = info.data.heartRate;
-  console.log(
-    plugin,
-    brightRed(format(new Date(), "MM-dd HH:mm")),
-    "Heart Rate:",
-    hr,
-  );
+  console.log(brightRed(format(new Date(), "MM-dd HH:mm")), "Heart Rate:", hr);
   manager.send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
 };
 ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);

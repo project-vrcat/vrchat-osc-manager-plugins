@@ -2,7 +2,6 @@ import WebSocket from "ws";
 import chalk from "chalk";
 
 export const pluginName = process.env.VRCOSCM_PLUGIN;
-export const plugin = chalk.yellow(`[${pluginName}]`);
 
 interface Pool {
   resolve: (value: void | PromiseLike<void>) => void;
@@ -26,7 +25,7 @@ export class Manager {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(this.address);
       this.ws.onopen = () => {
-        console.log(plugin, chalk.green("Manager Connected"));
+        console.log(chalk.green("Manager Connected"));
         resolve();
       };
       this.ws.onmessage = (event: MessageEvent) => {
@@ -44,7 +43,7 @@ export class Manager {
 
   reconnect() {
     const old = this.ws!;
-    console.log(plugin, chalk.green("Manager Reconnect"));
+    console.log(chalk.green("Manager Reconnect"));
     this.ws = new WebSocket(this.address);
     this.ws.onopen = old.onopen;
     this.ws.onmessage = old.onmessage;

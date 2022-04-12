@@ -1,8 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import { green, yellow } from "https://deno.land/std@0.129.0/fmt/colors.ts";
+import { green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
 
 export const pluginName = Deno.env.get("VRCOSCM_PLUGIN");
-export const plugin = yellow(`[${pluginName}]`);
 
 interface Pool {
   resolve: (value: void | PromiseLike<void>) => void;
@@ -26,7 +25,7 @@ export class Manager {
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(this.address);
       this.ws.onopen = () => {
-        console.log(plugin, green("Manager Connected"));
+        console.log(green("Manager Connected"));
         resolve();
       };
       this.ws.onmessage = (event: MessageEvent) => {
@@ -44,7 +43,7 @@ export class Manager {
 
   reconnect() {
     const old = this.ws!;
-    console.log(plugin, green("Manager Reconnect"));
+    console.log(green("Manager Reconnect"));
     this.ws = new WebSocket(this.address);
     this.ws.onopen = old.onopen;
     this.ws.onmessage = old.onmessage;
