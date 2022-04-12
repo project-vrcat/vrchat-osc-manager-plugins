@@ -5,5 +5,5 @@ name = "pulsoid-plugin"
 version = "0.0.1"
 
 [entrypoint]
-args = ["run", "-A", "main.ts"]
+args = ["run", "-A", "pulsoid-plugin.ts"]
 executable = "deno.exe"
