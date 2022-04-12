@@ -64,7 +64,6 @@ async function start() {
   );
 
   const { readable, writable } = await ws.connection;
-  const reader = readable.getReader();
   const writer = writable.getWriter();
 
   const heartbeat = () =>
@@ -73,9 +72,8 @@ async function start() {
   setTimeout((_) => writer.write(phx_join), 100);
 
   let isFirst = true;
-  while (true) {
-    const { value, done } = await reader.read();
-    const info = JSON.parse(value as string);
+  for await (const message of readable) {
+    const info = JSON.parse(message as string);
     if (info.length === 5) {
       const nt = brightRed(format(new Date(), "MM-dd HH:mm:ss"));
       switch (info[3]) {
@@ -94,11 +92,9 @@ async function start() {
           break;
 
         default:
-          console.log(value);
+          console.log(message);
           break;
       }
-
-      if (done) break;
     }
   }
 
