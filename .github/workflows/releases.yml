@@ -1,0 +1,84 @@
+name: Releases
+
+on: [push]
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      pulsoid-plugin: ${{ steps.changes.outputs.pulsoid-plugin }}
+      hyperate-plugin-deno: ${{ steps.changes.outputs.hyperate-plugin-deno }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            pulsoid-plugin:
+              - 'pulsoid-plugin/**'
+            hyperate-plugin-deno:
+              - 'hyperate-plugin-deno/**'
+
+  pulsoid-plugin:
+    name: Bundle pulsoid-plugin
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: ${{ needs. check-changes.outputs.pulsoid-plugin == 'true' }}
+    defaults:
+      run:
+        working-directory: ./pulsoid-plugin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: "1.20.5"
+
+      - name: Bundle
+        run: deno run -A bundle.ts
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pulsoid-plugin
+          path: |
+            pulsoid-plugin/pulsoid-plugin.js
+            pulsoid-plugin/manifest.toml
+
+  hyperate-plugin-deno:
+    name: Bundle hyperate-plugin-deno
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: ${{ needs. check-changes.outputs.hyperate-plugin-deno == 'true' }}
+    defaults:
+      run:
+        working-directory: ./hyperate-plugin-deno
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: "1.20.5"
+
+      - name: Bundle
+        run: deno run -A bundle.ts
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: hyperate-plugin-deno
+          path: |
+            hyperate-plugin-deno/hyperate-plugin.js
+            hyperate-plugin-deno/manifest.toml
+
+      - name: Bundle RegExp
+        run: deno run -A bundle-regexp.ts
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: hyperate-plugin-deno-regexp
+          path: |
+            hyperate-plugin-deno/hyperate-plugin.js
+            hyperate-plugin-deno/manifest.toml

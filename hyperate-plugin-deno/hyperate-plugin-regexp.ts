@@ -1,5 +1,4 @@
 import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
-import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts";
 import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
 import { Manager } from "../module/deno/vrchat-osc-manager.ts";
 
@@ -24,7 +23,6 @@ const resp = await fetch("https://app.hyperate.io/" + options.id, {
   },
 });
 const body = await resp.text();
-
 let cookies = "";
 resp.headers
   .get("set-cookie")
@@ -33,13 +31,12 @@ resp.headers
   .map((c) => c.split(";")[0].split("="))
   .forEach(([k, v]) => (cookies += `${k}=${v};`));
 
-const dom = new DOMParser().parseFromString(body, "text/html");
-const csrf_token = dom?.querySelector("meta[name=csrf-token]")?.getAttribute("content");
-const view = dom?.querySelector(`[data-phx-view]`);
+const csrf_token = /<meta\s+charset="UTF-8"\s+content="([\S\s]*?)"\s+csrf-param="_csrf_token"/g.exec(body)![1];
+const view = /<div\s+data-phx-main="true"\s+data-phx-session="([\S\s]*?)"\s+data-phx-static="([\S\s]*?)"\s+data-phx-view="[\S\s]*?"\sid="([\S\s]*?)">/g.exec(body)!;
 const phx_join = JSON.stringify([
   "4",
   "4",
-  "lv:" + view?.getAttribute("id"),
+  "lv:" + view[3],
   "phx_join",
   {
     url: "https://app.hyperate.io/" + options.id,
@@ -47,8 +44,8 @@ const phx_join = JSON.stringify([
       _csrf_token: csrf_token,
       _mounts: 0,
     },
-    session: view?.getAttribute("data-phx-session"),
-    static: view?.getAttribute("data-phx-static"),
+    session: view[1],
+    static: view[2],
   },
 ]);
 
