@@ -74,7 +74,7 @@ async function main() {
         case "diff":
           hr = info[4].e[0][1].heartbeat;
           console.log(
-            chalk.redBright(format(new Date(), "MM-dd HH:mm")),
+            chalk.redBright(format(new Date(), "MM-dd HH:mm:ss")),
             "Heart Rate:",
             hr,
           );

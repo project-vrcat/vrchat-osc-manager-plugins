@@ -50,7 +50,8 @@ ws.onopen = () => console.log(green("Pulsoid Connected"));
 ws.onmessage = (event: MessageEvent) => {
   const info = JSON.parse(event.data);
   const hr = info.data.heartRate;
-  console.log(brightRed(format(new Date(), "MM-dd HH:mm")), "Heart Rate:", hr);
+  const nt = brightRed(format(new Date(), "MM-dd HH:mm:ss"));
+  console.log(nt, "Heart Rate:", hr);
   manager.send("/avatar/parameters/OSC_HeartRate", hr / (220 / 2) - 1);
 };
 ws.onclose = () => setTimeout((_) => reconnect(ws), 1000);
