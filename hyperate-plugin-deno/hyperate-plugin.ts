@@ -1,12 +1,11 @@
 import { brightRed, green } from "https://deno.land/std@0.129.0/fmt/colors.ts";
-import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.21-alpha/deno-dom-wasm.ts";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.22-alpha/deno-dom-wasm.ts";
 import { format } from "https://deno.land/std@0.129.0/datetime/mod.ts";
 import { Manager } from "../module/deno/vrchat-osc-manager.ts";
 
 interface Options {
   id: string;
 }
-
 const manager = new Manager();
 await manager.connect();
 const options: Options = await manager.getOptions();
@@ -35,14 +34,12 @@ resp.headers
   .forEach(([k, v]) => (cookies += `${k}=${v};`));
 
 const dom = new DOMParser().parseFromString(body, "text/html");
-const csrf_token = dom?.querySelector(`meta[name=csrf-token]`)?.attributes[
-  "content"
-]!;
+const csrf_token = dom?.querySelector("meta[name=csrf-token]")?.getAttribute("content");
 const view = dom?.querySelector(`[data-phx-view]`);
 const phx_join = JSON.stringify([
   "4",
   "4",
-  "lv:" + view?.attributes["id"],
+  "lv:" + view?.getAttribute("id"),
   "phx_join",
   {
     url: "https://app.hyperate.io/" + options.id,
@@ -50,8 +47,8 @@ const phx_join = JSON.stringify([
       _csrf_token: csrf_token,
       _mounts: 0,
     },
-    session: view?.attributes["data-phx-session"],
-    static: view?.attributes["data-phx-static"],
+    session: view?.getAttribute("data-phx-session"),
+    static: view?.getAttribute("data-phx-static"),
   },
 ]);
 
