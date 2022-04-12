@@ -61,11 +61,7 @@ async function main() {
   const start = () => {
     ws = new WebSocket(
       `wss://app.hyperate.io/live/websocket?_csrf_token=${csrf_token}&_mounts=0&vsn=2.0.0`,
-      {
-        headers: {
-          Cookie: cookies,
-        },
-      },
+      { headers: { Cookie: cookies } },
     );
     ws.onopen = () => {
       console.log(plugin, chalk.green("Hyperate Connected"));
