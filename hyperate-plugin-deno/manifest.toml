@@ -1,0 +1,9 @@
+name = "hyperate-plugin-deno"
+version = "0.0.1"
+author = "Gizmo"
+description = "Hyperate Plugin Deno"
+homepage = "https://github.com/project-vrcat/vrchat-osc-manager-plugins/tree/main/hyperate-plugin-deno"
+
+[entrypoint]
+args = ["run", "-A", "--unstable", "hyperate-plugin.ts"]
+executable = "deno.exe"
