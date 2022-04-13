@@ -5,5 +5,5 @@ name = "pulsoid-plugin"
 version = "0.0.1"
 
 [entrypoint]
-args = ["run", "-A", "pulsoid-plugin.js"]
+args = ["run", "--allow-env", "--allow-net", "pulsoid-plugin.js"]
 executable = "deno.exe"

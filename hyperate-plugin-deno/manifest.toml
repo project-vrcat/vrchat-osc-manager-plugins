@@ -5,5 +5,5 @@ description = "Hyperate Plugin Deno"
 homepage = "https://github.com/project-vrcat/vrchat-osc-manager-plugins/tree/main/hyperate-plugin-deno"
 
 [entrypoint]
-args = ["run", "-A", "--unstable", "hyperate-plugin.js"]
+args = ["run", "--allow-env", "--allow-net", "--unstable", "hyperate-plugin.js"]
 executable = "deno.exe"
