@@ -9,6 +9,7 @@ type value = string | number | boolean;
 type Events = {
   parameters: [name: string, value: value[]];
   options: [Record<string, any>];
+  avatar_change: [];
 };
 
 interface ManagerEvent {
@@ -46,6 +47,9 @@ export class Manager extends EventEmitter<Events> {
           case "get_options":
             this.emit("options", m.options);
             break;
+          case "avatar_change":
+            this.emit("avatar_change");
+            break;
           case "parameters":
             this.emit("parameters", m.parameterName, m.parameterValue);
             break;
@@ -68,7 +72,7 @@ export class Manager extends EventEmitter<Events> {
   }
 
   private wsSend(data: any) {
-    (this.ws?.readyState === WebSocket.OPEN) &&
+    this.ws?.readyState === WebSocket.OPEN &&
       this.ws.send(JSON.stringify(data));
   }
 
@@ -89,5 +93,9 @@ export class Manager extends EventEmitter<Events> {
       plugin: pluginName,
       parameters: p,
     });
+  }
+
+  listenAvatarChange() {
+    this.wsSend({ method: "listen_avatar_change", plugin: pluginName });
   }
 }
