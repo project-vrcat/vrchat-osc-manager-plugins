@@ -1,0 +1,7 @@
+name = "face-tracking-plugin"
+version = "0.0.1"
+author = "Gizmo"
+
+[entrypoint]
+args = ["run", "--allow-env", "--allow-net","--allow-run", "plugin.js"]
+executable = "deno.exe"

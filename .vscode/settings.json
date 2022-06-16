@@ -2,5 +2,10 @@
   "deno.enable": true,
   "deno.lint": true,
   "deno.unstable": true,
-  "deno.enablePaths": ["pulsoid-plugin", "hyperate-plugin-deno", "module/deno"]
+  "deno.enablePaths": [
+    "pulsoid-plugin",
+    "hyperate-plugin-deno",
+    "module/deno",
+    "face-tracking-plugin"
+  ]
 }
